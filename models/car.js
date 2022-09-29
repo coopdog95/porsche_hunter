@@ -12,7 +12,7 @@ const byHuntId = async huntId => await Car.find({ hunt_id: huntId })
 
 const createNewCar = async car => {
   if (car.image_data) {
-    const imageUrl = await uploadImageData(imageData)
+    const imageUrl = await uploadImageData(car.image_data)
     delete car.image_data
     return await Car.create({
       ...car,
@@ -31,6 +31,7 @@ const updateCar = async (carId, carProps) => await Car.update(carId, carProps)
 
 const uploadImageData = async imageData => {
   console.log('uploading image data...', imageData?.slice(0, 50))
+  return imageData
 }
 
 module.exports = {
