@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const SECRET = process.env.JWT_SECRET
 
-const User = model({
+const SafeUser = model({
   name: 'users',
   tableName: 'users',
   selectableProps: ['id', 'username'],
@@ -15,15 +15,17 @@ const UserWithPasswordDigest = model({
   selectableProps: ['id', 'username', 'password_digest'],
 })
 
-const getAllUsers = async () => await User.findAll()
+const User = (safe = true) => (safe ? SafeUser : UserWithPasswordDigest)
+
+const getAllUsers = async () => await User().findAll()
 
 const createNewUser = async (username, password) => {
   const hashedPassword = await bcrypt.hash(password, 10)
-  return User.create({ username, password_digest: hashedPassword })
+  return User().create({ username, password_digest: hashedPassword })
 }
 
 const authenticateUser = async (username, password) => {
-  const [foundUser] = await UserWithPasswordDigest.find({ username })
+  const [foundUser] = await User(false).find({ username })
   if (!foundUser) return { authenticated: false, user: null }
 
   const passwordsMatch = await bcrypt.compare(
