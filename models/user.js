@@ -17,6 +17,8 @@ const UserWithPasswordDigest = model({
 
 const User = (safe = true) => (safe ? SafeUser : UserWithPasswordDigest)
 
+const findById = async id => await User().find({ id })
+
 const getAllUsers = async () => await User().findAll()
 
 const createNewUser = async (username, password) => {
@@ -49,4 +51,5 @@ module.exports = {
   createNewUser,
   authenticateUser,
   issueToken,
+  findById,
 }
