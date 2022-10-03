@@ -28,8 +28,8 @@ router.get('/:huntId', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
   const { huntProps, cars } = req.body
   try {
-    const { hunt, cars: createdCars } = await createNewHunt(huntProps, cars)
-    res.status(201).json({ hunt, cars: createdCars })
+    const newHunt = await createNewHunt(huntProps, cars)
+    res.status(201).json(newHunt)
   } catch (error) {
     res.status(401).json({
       error: `Hunt could not be created: ${error}`,
@@ -39,9 +39,9 @@ router.post('/', async (req, res, next) => {
 
 router.patch('/:huntId', async (req, res, next) => {
   const { huntId } = req.params
-  const { huntProps } = req.body
+  const { huntProps, cars } = req.body
   try {
-    const [updatedHunt] = await updateHunt(huntId, huntProps)
+    const updatedHunt = await updateHunt(huntId, huntProps, cars)
     res.status(200).json(updatedHunt)
   } catch (error) {
     res.status(401).json({

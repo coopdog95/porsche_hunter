@@ -5,6 +5,7 @@ const {
   createNewCar,
   findById,
   updateCar,
+  deleteCar,
 } = require('../models/car')
 
 router.get('/', async (req, res, next) => {
@@ -45,6 +46,18 @@ router.patch('/:carId', async (req, res, next) => {
   } catch (error) {
     res.status(401).json({
       error: 'Error updating car',
+    })
+  }
+})
+
+router.delete('/:carId', async (req, res, next) => {
+  const { carId } = req.params
+  try {
+    await deleteCar(carId)
+    res.status(200).json({ message: `Car ${carId} }deleted` })
+  } catch (error) {
+    res.status(401).json({
+      error: 'Error deleting car',
     })
   }
 })

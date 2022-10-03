@@ -1,17 +1,42 @@
 var AWS = require('aws-sdk')
+const crypto = require('crypto')
 
 AWS.config.update({ region: 'us-west-1' })
-s3 = new AWS.S3({ apiVersion: '2006-03-01' })
+const s3Bucket = new AWS.S3({ params: { Bucket: process.env.S3_BUCKET_ID } })
 
-const listBuckets = () =>
-  s3.listBuckets(function (err, data) {
-    if (err) {
-      console.log('Error', err)
-    } else {
-      console.log('Success', data.Buckets)
-    }
-  })
+const baseUrl = 'https://porsche-hunter.s3.us-west-1.amazonaws.com'
+
+const uploadImage = async imageData => {
+  var buf = Buffer.from(
+    imageData.replace(/^data:image\/\w+;base64,/, ''),
+    'base64',
+  )
+  const key = crypto.randomUUID()
+  var data = {
+    Key: key,
+    ContentEncoding: 'base64',
+    Body: buf,
+    ContentType: 'image/jpeg',
+  }
+  try {
+    await s3Bucket.putObject(data).promise()
+    return `${baseUrl}/${key}`
+  } catch (error) {
+    console.error('upload error: ', err)
+    return null
+  }
+}
+
+const deleteImage = async imageUrl => {
+  const key = imageUrl.split(`${baseUrl}/`)[1]
+  try {
+    await s3Bucket.deleteObject({ Key: key }).promise()
+  } catch (error) {
+    console.log('delete error', error)
+  }
+}
 
 module.exports = {
-  listBuckets,
+  uploadImage,
+  deleteImage,
 }

@@ -1,5 +1,9 @@
 const model = require('./')
-const { createNewCar, byHuntId } = require('./car')
+const {
+  createNewCar,
+  byHuntId: carsByHuntId,
+  createOrUpdateCar,
+} = require('./car')
 const { findById: userById } = require('./user')
 
 const Hunt = model({
@@ -17,7 +21,7 @@ const getAllHunts = async () => {
 }
 
 const serializeHunt = async hunt => {
-  const cars = await byHuntId(hunt.id)
+  const cars = await carsByHuntId(hunt.id)
   const [user] = await userById(hunt.user_id)
   return { ...hunt, cars, user }
 }
@@ -27,20 +31,22 @@ const findById = async id => {
   return await serializeHunt(foundHunt)
 }
 
-const updateHunt = async (huntId, huntProps) =>
-  await Hunt.update(huntId, huntProps)
+const updateHunt = async (huntId, huntProps, cars) => {
+  const [updatedHunt] = await Hunt.update(huntId, huntProps)
+  await Promise.all(
+    cars.map(async car => await createOrUpdateCar(car, updatedHunt.id)),
+  )
+  return await serializeHunt(updatedHunt)
+}
 
 const createNewHunt = async (hunt, cars) => {
   if (!cars?.length) return Promise.reject('No cars added to hunt')
 
   const [newHunt] = await Hunt.create(hunt)
-  const createdCars = await Promise.all(
-    cars.map(async car => {
-      const [newCar] = await createNewCar({ ...car, hunt_id: newHunt.id })
-      return newCar
-    }),
+  await Promise.all(
+    cars.map(async car => await createNewCar({ ...car, hunt_id: newHunt.id })),
   )
-  return { hunt: newHunt, cars: createdCars }
+  return await serializeHunt(newHunt)
 }
 
 module.exports = {
