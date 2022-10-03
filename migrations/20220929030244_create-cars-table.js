@@ -1,7 +1,6 @@
 exports.up = function (knex) {
   return knex.schema.createTable('cars', table => {
     table.increments()
-    table.integer('year')
     table.string('model').notNullable().index()
     table.string('trim').notNullable().index()
     table.string('image_url')
