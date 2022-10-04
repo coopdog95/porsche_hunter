@@ -4,6 +4,7 @@ const {
   byHuntId: carsByHuntId,
   createOrUpdateCar,
 } = require('./car')
+const { deleteImage } = require('../helpers/imageUpload')
 const { findById: userById } = require('./user')
 
 const Hunt = model({
@@ -13,7 +14,7 @@ const Hunt = model({
 })
 
 const getAllHunts = async () => {
-  const hunts = await Hunt.findAll()
+  const hunts = await Hunt.findAll().orderBy('created_at', 'desc')
   const serializedHunts = await Promise.all(
     hunts.map(async hunt => await serializeHunt(hunt)),
   )
@@ -39,14 +40,18 @@ const updateHunt = async (huntId, huntProps, cars) => {
   return await serializeHunt(updatedHunt)
 }
 
-const createNewHunt = async (hunt, cars) => {
+const createNewHunt = async (userId, hunt, cars) => {
   if (!cars?.length) return Promise.reject('No cars added to hunt')
-
-  const [newHunt] = await Hunt.create(hunt)
-  await Promise.all(
-    cars.map(async car => await createNewCar({ ...car, hunt_id: newHunt.id })),
-  )
+  const huntProps = { ...hunt, user_id: userId }
+  const [newHunt] = await Hunt.create(huntProps)
+  await Promise.all(cars.map(async car => await createNewCar(car, newHunt.id)))
   return await serializeHunt(newHunt)
+}
+
+const deleteHunt = async huntId => {
+  const cars = await carsByHuntId(huntId)
+  await Promise.all(cars.map(async car => await deleteImage(car.image_url)))
+  await Hunt.destroy(huntId)
 }
 
 module.exports = {
@@ -54,4 +59,5 @@ module.exports = {
   findById,
   updateHunt,
   createNewHunt,
+  deleteHunt,
 }

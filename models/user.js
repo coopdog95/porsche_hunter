@@ -46,10 +46,19 @@ const issueToken = async user => {
   }
 }
 
+const verifyToken = req => {
+  const {
+    headers: { authorization: token },
+  } = req
+  const decoded = jwt.verify(token, SECRET)
+  return decoded.user_id
+}
+
 module.exports = {
   getAllUsers,
   createNewUser,
   authenticateUser,
   issueToken,
   findById,
+  verifyToken,
 }

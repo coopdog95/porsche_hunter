@@ -28,6 +28,8 @@ const uploadImage = async imageData => {
 }
 
 const deleteImage = async imageUrl => {
+  if (!imageUrl) return
+
   const key = imageUrl.split(`${baseUrl}/`)[1]
   try {
     await s3Bucket.deleteObject({ Key: key }).promise()
