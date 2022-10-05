@@ -32,7 +32,6 @@ router.post('/', async (req, res, next) => {
   const { huntProps, cars } = req.body
   try {
     const newHunt = await createNewHunt(userId, huntProps, cars)
-    console.log('newHunt', newHunt)
     res.status(201).json(newHunt)
   } catch (error) {
     res.status(401).json({
