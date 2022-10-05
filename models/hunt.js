@@ -10,7 +10,15 @@ const { findById: userById } = require('./user')
 const Hunt = model({
   name: 'hunts',
   tableName: 'hunts',
-  selectableProps: ['id', 'title', 'description', 'user_id', 'created_at'],
+  selectableProps: [
+    'id',
+    'title',
+    'description',
+    'user_id',
+    'latitude',
+    'longitude',
+    'created_at',
+  ],
 })
 
 const getAllHunts = async () => {
