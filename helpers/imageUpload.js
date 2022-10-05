@@ -22,7 +22,7 @@ const uploadImage = async imageData => {
     await s3Bucket.putObject(data).promise()
     return `${baseUrl}/${key}`
   } catch (error) {
-    console.error('upload error: ', err)
+    console.error('upload error: ', error)
     return null
   }
 }
